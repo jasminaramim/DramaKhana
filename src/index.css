@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --color-emerald-royal: #087F5B;
+  --color-maroon-deep: #791F35;
+  --color-gold-royal: #D4AF6A;
+  --color-canvas: #101512;
+  --color-surface: #1A211D;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    background-color: #101512;
+    color: #ffffff;
+    scroll-behavior: smooth;
+  }
+
+  h1, h2, .font-display {
+    font-family: var(--font-display);
+  }
+}
+
+/* Custom sleek dark scrollbar for horizontal streaming rails */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Subtle Pakistani geometric jali hairline pattern */
+.jali-divider {
+  background-image: linear-gradient(90deg, transparent, rgba(212, 175, 106, 0.32), transparent);
+  height: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

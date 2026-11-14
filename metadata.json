@@ -1,0 +1,6 @@
+{
+  "name": "DramaKhana",
+  "description": "Premium Pakistani Drama Streaming Platform with dual YouTube and original uploaded video streaming.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

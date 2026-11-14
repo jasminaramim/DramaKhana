@@ -63,10 +63,16 @@ import {
 const router = express.Router();
 
 // Configure multer disk storage for Own Uploaded Videos & Thumbnails
-const UPLOAD_VIDEOS_DIR = path.resolve(process.cwd(), 'uploads', 'videos');
-const UPLOAD_THUMBS_DIR = path.resolve(process.cwd(), 'uploads', 'thumbnails');
-fs.mkdirSync(UPLOAD_VIDEOS_DIR, { recursive: true });
-fs.mkdirSync(UPLOAD_THUMBS_DIR, { recursive: true });
+const isVercel = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+const uploadsBase = isVercel ? path.join('/tmp', 'uploads') : path.resolve(process.cwd(), 'uploads');
+const UPLOAD_VIDEOS_DIR = path.join(uploadsBase, 'videos');
+const UPLOAD_THUMBS_DIR = path.join(uploadsBase, 'thumbnails');
+try {
+  fs.mkdirSync(UPLOAD_VIDEOS_DIR, { recursive: true });
+  fs.mkdirSync(UPLOAD_THUMBS_DIR, { recursive: true });
+} catch {
+  // Read-only filesystem warning handled gracefully
+}
 
 const storage = multer.diskStorage({
   destination: (_req, file, cb) => {

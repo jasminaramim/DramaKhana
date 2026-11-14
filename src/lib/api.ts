@@ -106,7 +106,8 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 
   try {
     const res = await fetch(path, { ...init, headers });
-    if (res.ok) {
+    const contentType = res.headers.get('content-type') || '';
+    if (res.ok && contentType.includes('application/json')) {
       return (await res.json()) as T;
     }
   } catch {

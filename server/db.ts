@@ -26,16 +26,29 @@ import type {
   WatchHistoryItem,
 } from '../src/types.js';
 
-const DATA_DIR = path.resolve(process.cwd(), 'data');
+const isVercel = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+const DATA_DIR = isVercel ? path.join('/tmp', 'data') : path.resolve(process.cwd(), 'data');
 const DB_PATH = path.join(DATA_DIR, 'dramakhana.db');
 
-let db: Database.Database;
+let db: Database.Database | null = null;
 let mongoConnected = false;
 
-export function getDb(): Database.Database {
-  if (!db) {
-    throw new Error('Database not initialized');
+let catalogDataCache: any = null;
+export function getCatalogData(): any {
+  if (!catalogDataCache) {
+    try {
+      const p = path.resolve(process.cwd(), 'src', 'data', 'catalog.json');
+      if (fs.existsSync(p)) {
+        catalogDataCache = JSON.parse(fs.readFileSync(p, 'utf-8'));
+      }
+    } catch {
+      catalogDataCache = null;
+    }
   }
+  return catalogDataCache;
+}
+
+export function getDb(): Database.Database | null {
   return db;
 }
 
@@ -57,10 +70,11 @@ function createId(prefix: string): string {
 }
 
 export async function initDatabase(): Promise<void> {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-  db = new Database(DB_PATH);
-  db.pragma('journal_mode = WAL');
-  db.pragma('foreign_keys = ON');
+  try {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+    db = new Database(DB_PATH);
+    db.pragma('journal_mode = WAL');
+    db.pragma('foreign_keys = ON');
 
   db.exec(`
     CREATE TABLE IF NOT EXISTS users (
@@ -179,10 +193,21 @@ export async function initDatabase(): Promise<void> {
     }
   }
 
-  seedInitialData();
+    seedInitialData();
 
-  if (mongoConnected) {
-    syncAllToMongo().catch((err) => console.warn('Initial MongoDB sync warning:', err));
+    if (mongoConnected) {
+      syncAllToMongo().catch((err) => console.warn('Initial MongoDB sync warning:', err));
+    }
+  } catch (err) {
+    console.warn('SQLite init warning (operating in resilient memory/Mongo mode):', (err as Error).message);
+    const mongoUri = process.env.MONGODB_URI;
+    if (mongoUri && !mongoConnected) {
+      try {
+        await mongoose.connect(mongoUri.trim(), { serverSelectionTimeoutMS: 4000 });
+        mongoConnected = true;
+        console.log('MongoDB connected via resilient fallback.');
+      } catch {}
+    }
   }
 }
 
@@ -262,6 +287,7 @@ export async function syncAllToMongo(): Promise<Record<string, number>> {
 }
 
 function seedInitialData(): void {
+  if (!db) return;
   const now = new Date().toISOString();
 
   // Always ensure admin user `jasmin` exists with the requested credentials
@@ -1061,6 +1087,21 @@ function mapVideo(row: Record<string, unknown>): Video {
 // --- Users & Auth ---
 export function findUserByIdentifier(identifier: string): (User & { password: string }) | null {
   const clean = identifier.trim();
+  if (!db) {
+    if (clean.toLowerCase() === 'jasmin' || clean.toLowerCase() === 'jasmin@dramakhana.pk') {
+      return {
+        _id: 'usr_jasmin',
+        username: 'jasmin',
+        name: 'Jasmin Admin',
+        email: 'jasmin@dramakhana.pk',
+        password: hashPassword('jasmin1142005'),
+        role: 'admin',
+        watchlist: ['drm_dare_nijat', 'drm_kmkt'],
+        createdAt: new Date().toISOString(),
+      };
+    }
+    return null;
+  }
   const row = db
     .prepare('SELECT * FROM users WHERE LOWER(email) = LOWER(?) OR LOWER(username) = LOWER(?)')
     .get(clean, clean) as Record<string, unknown> | undefined;
@@ -1082,6 +1123,20 @@ export function findUserByEmail(email: string): (User & { password: string }) | 
 }
 
 export function findUserById(id: string): User | null {
+  if (!db) {
+    if (id === 'usr_jasmin') {
+      return {
+        _id: 'usr_jasmin',
+        username: 'jasmin',
+        name: 'Jasmin Admin',
+        email: 'jasmin@dramakhana.pk',
+        role: 'admin',
+        watchlist: ['drm_dare_nijat', 'drm_kmkt'],
+        createdAt: new Date().toISOString(),
+      };
+    }
+    return null;
+  }
   const row = db.prepare('SELECT _id, username, name, email, role, watchlist, createdAt FROM users WHERE _id = ?').get(id) as
     | Record<string, unknown>
     | undefined;
@@ -1163,6 +1218,9 @@ export function toggleWatchlist(userId: string, dramaId: string, action: 'add' |
 
 // --- Categories ---
 export function listCategories(includeInactive = false): Category[] {
+  if (!db) {
+    return (getCatalogData()?.categories || []) as Category[];
+  }
   const where = includeInactive ? '' : `WHERE c.status = 'active'`;
   const rows = db
     .prepare(
@@ -1246,6 +1304,9 @@ export function deleteCategory(id: string): boolean {
 
 // --- Channels & Actors ---
 export function listChannels(): Channel[] {
+  if (!db) {
+    return (getCatalogData()?.channels || []) as Channel[];
+  }
   return db.prepare('SELECT * FROM channels ORDER BY name ASC').all() as Channel[];
 }
 
@@ -1287,6 +1348,9 @@ export function deleteChannel(id: string): boolean {
 }
 
 export function listActors(): Actor[] {
+  if (!db) {
+    return (getCatalogData()?.actors || []) as Actor[];
+  }
   return db.prepare('SELECT * FROM actors ORDER BY name ASC').all() as Actor[];
 }
 
@@ -1321,6 +1385,18 @@ function getEpisodeCountMap(): Map<string, number> {
 }
 
 export function listDramas(options?: { includeDrafts?: boolean; channel?: string; genre?: string }): Drama[] {
+  if (!db) {
+    const cat = getCatalogData();
+    let items: Drama[] = cat?.dramas || [];
+    if (options?.channel) {
+      items = items.filter((d) => d.channel.toLowerCase() === options.channel?.toLowerCase());
+    }
+    if (options?.genre) {
+      const g = options.genre.toLowerCase();
+      items = items.filter((d) => d.genres.some((item) => item.toLowerCase() === g));
+    }
+    return items;
+  }
   const conditions: string[] = [];
   const params: unknown[] = [];
   if (!options?.includeDrafts) {
@@ -1352,6 +1428,10 @@ export function listDramas(options?: { includeDrafts?: boolean; channel?: string
 }
 
 export function getDramaBySlug(slug: string): Drama | null {
+  if (!db) {
+    const cat = getCatalogData();
+    return (cat?.dramas || []).find((d: any) => d.slug === slug || d._id === slug) || null;
+  }
   const row = db.prepare('SELECT * FROM dramas WHERE slug = ? OR _id = ?').get(slug, slug) as
     | Record<string, unknown>
     | undefined;
@@ -1438,6 +1518,14 @@ export interface VideoQuery {
 }
 
 export function listVideos(query: VideoQuery = {}): { videos: Video[]; total: number } {
+  if (!db) {
+    const cat = getCatalogData();
+    let items: Video[] = cat?.videos || [];
+    if (query.dramaId) items = items.filter((v: any) => v.dramaId === query.dramaId);
+    if (query.channel) items = items.filter((v: any) => v.channel.toLowerCase() === query.channel?.toLowerCase());
+    if (query.source_type && query.source_type !== 'all') items = items.filter((v: any) => v.source_type === query.source_type);
+    return { videos: items, total: items.length };
+  }
   const conditions: string[] = [];
   const params: unknown[] = [];
 
@@ -1517,6 +1605,10 @@ export function listVideos(query: VideoQuery = {}): { videos: Video[]; total: nu
 }
 
 export function getVideoById(id: string): Video | null {
+  if (!db) {
+    const cat = getCatalogData();
+    return (cat?.videos || []).find((v: any) => v._id === id || v.youtubeVideoId === id) || null;
+  }
   const row = db
     .prepare(
       `SELECT v.*, d.title as dramaTitle, d.slug as dramaSlug, c.name as categoryName, c.slug as categorySlug
@@ -1630,6 +1722,10 @@ export function listWatchHistory(userId: string): WatchHistoryItem[] {
 
 // --- Homepage & Search Aggregations ---
 export function getHomePayload(): HomePayload {
+  if (!db) {
+    const cat = getCatalogData();
+    if (cat?.home) return cat.home;
+  }
   const allDramas = listDramas();
   const featuredDramas = allDramas.filter((d) => d.featured);
   const { videos: popularVideos } = listVideos({ sort: 'popular', limit: 16 });
@@ -1762,6 +1858,35 @@ export function globalSearch(params: {
 }
 
 export function getAdminStats(): AdminStats {
+  if (!db) {
+    const cat = getCatalogData();
+    const totalVideos = cat?.videos?.length || 0;
+    const youtubeVideos = totalVideos;
+    const ownUploadedVideos = 0;
+    const totalDramas = cat?.dramas?.length || 0;
+    const totalCategories = cat?.categories?.length || 0;
+    const totalUsers = 1;
+    const recentUploads = (cat?.videos || []).slice(0, 6);
+    const categoryBreakdown = (cat?.categories || []).map((c: any) => ({
+      _id: c._id,
+      name: c.name,
+      slug: c.slug,
+      youtubeCount: c.youtubeCount || 0,
+      ownUploadCount: c.ownUploadCount || 0,
+      totalCount: c.totalCount || 0,
+    }));
+    return {
+      totalVideos,
+      youtubeVideos,
+      ownUploadedVideos,
+      totalDramas,
+      totalCategories,
+      totalEpisodes: totalVideos,
+      totalUsers,
+      recentUploads,
+      categoryBreakdown,
+    };
+  }
   const totalVideos = (db.prepare('SELECT COUNT(*) as c FROM videos').get() as { c: number }).c;
   const youtubeVideos = (db.prepare(`SELECT COUNT(*) as c FROM videos WHERE source_type = 'youtube'`).get() as { c: number }).c;
   const ownUploadedVideos = (db.prepare(`SELECT COUNT(*) as c FROM videos WHERE source_type = 'own_upload'`).get() as { c: number }).c;

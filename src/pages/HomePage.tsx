@@ -4,6 +4,7 @@ import type { Drama, HomePayload } from '../types';
 import { api } from '../lib/api';
 import { HeroBanner } from '../components/HeroBanner';
 import { ContentRow } from '../components/ContentRow';
+import { ScrollVideoFeature } from '../components/ScrollVideoFeature';
 
 interface HomePageProps {
   watchlistIds: string[];
@@ -128,14 +129,24 @@ export function HomePage({ watchlistIds, onNavigate, onToggleWatchlist }: HomePa
       {/* Dynamic Netflix-style Horizontal Content Rows */}
       <div className="space-y-2">
         {data.sections.map((section) => (
-          <ContentRow
-            key={section.id}
-            section={section}
-            watchlistIds={watchlistIds}
-            onSelectDrama={(slug) => onNavigate(`/drama/${slug}`)}
-            onWatchVideo={(videoId) => onNavigate(`/watch/${videoId}`)}
-            onToggleWatchlist={onToggleWatchlist}
-          />
+          <div key={section.id}>
+            {/* User requirement: Before Romantic Dramas add a video section nicely when scrolling only then just play the video 3rd.mp4 */}
+            {(section.id === 'romantic' || section.id === 'romantic-dramas') && (
+              <ScrollVideoFeature
+                videoSrc="/3rd.mp4"
+                title="Cinematic Spotlight · Pakistani Masterpiece Experience"
+                subtitle="Exclusive high-definition drama stream. Plays seamlessly as you journey through DramaKhana."
+                tag="Exclusive Reel · 3rd.mp4"
+              />
+            )}
+            <ContentRow
+              section={section}
+              watchlistIds={watchlistIds}
+              onSelectDrama={(slug) => onNavigate(`/drama/${slug}`)}
+              onWatchVideo={(videoId) => onNavigate(`/watch/${videoId}`)}
+              onToggleWatchlist={onToggleWatchlist}
+            />
+          </div>
         ))}
       </div>
     </div>

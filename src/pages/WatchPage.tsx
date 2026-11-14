@@ -1,5 +1,18 @@
 import { useEffect, useState } from 'react';
-import { Bookmark, Check, ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import {
+  Bookmark,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  ExternalLink,
+  Film,
+  Image as ImageIcon,
+  Play,
+  Share2,
+  Sparkles,
+  X,
+} from 'lucide-react';
 import type { Drama, Video } from '../types';
 import { api, formatViews } from '../lib/api';
 import { MediaImage } from '../components/MediaImage';
@@ -18,6 +31,29 @@ export function WatchPage({ videoId, watchlistIds, onNavigate, onToggleWatchlist
   const [episodes, setEpisodes] = useState<Video[]>([]);
   const [relatedDramas, setRelatedDramas] = useState<Drama[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  const handleDownloadDirect = (url: string, filename: string) => {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast('Download initiated successfully!');
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    showToast('Episode link copied to clipboard!');
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -166,6 +202,62 @@ export function WatchPage({ videoId, watchlistIds, onNavigate, onToggleWatchlist
             </h1>
             <p className="text-sm text-white/75 leading-relaxed mb-5">{video.description}</p>
 
+            {/* Quick Action Toolbar: Download, Save Video, Share */}
+            <div className="py-3 px-4 rounded-xl bg-[#101512] border border-white/10 flex flex-wrap items-center justify-between gap-3 mb-5">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (video.videoUrl && !video.videoUrl.startsWith('http')) {
+                      handleDownloadDirect(video.videoUrl, `${drama?.slug || 'episode'}-ep${video.episodeNumber}.mp4`);
+                    } else {
+                      setShowDownloadModal(true);
+                    }
+                  }}
+                  className="h-9 px-3.5 rounded-lg bg-[#087F5B] hover:bg-[#099268] text-xs font-semibold text-white inline-flex items-center gap-2 cursor-pointer shadow-md transition-colors"
+                  title="Download this episode easily"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Download Video</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (drama) {
+                      onToggleWatchlist(drama._id);
+                      showToast(inWatchlist ? 'Removed from Watchlist' : 'Saved to Watchlist!');
+                    }
+                  }}
+                  className={`h-9 px-3.5 rounded-lg border text-xs font-semibold inline-flex items-center gap-2 cursor-pointer transition-colors ${
+                    inWatchlist
+                      ? 'bg-[#791F35] border-[#791F35] text-white'
+                      : 'bg-[#1A211D] border-white/15 text-white hover:border-[#D4AF6A]'
+                  }`}
+                  title="Save video to watchlist easily"
+                >
+                  {inWatchlist ? <Check className="w-4 h-4 text-white" /> : <Bookmark className="w-4 h-4 text-[#D4AF6A]" />}
+                  <span>{inWatchlist ? 'Saved in Watchlist' : 'Save Video'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  className="h-9 px-3 rounded-lg bg-[#1A211D] border border-white/15 text-xs font-medium text-white hover:border-[#D4AF6A] inline-flex items-center gap-1.5 cursor-pointer transition-colors"
+                  title="Share / copy episode link"
+                >
+                  <Share2 className="w-3.5 h-3.5 text-white/70" />
+                  <span className="hidden sm:inline">Share</span>
+                </button>
+              </div>
+
+              {drama && (
+                <div className="text-xs text-white/60">
+                  Part of <span className="text-[#D4AF6A] font-semibold">{drama.title}</span> ({drama.totalEpisodes} Episodes)
+                </div>
+              )}
+            </div>
+
             {drama && (
               <div className="pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-4">
                 <div>
@@ -183,7 +275,10 @@ export function WatchPage({ videoId, watchlistIds, onNavigate, onToggleWatchlist
 
                 <button
                   type="button"
-                  onClick={() => onToggleWatchlist(drama._id)}
+                  onClick={() => {
+                    onToggleWatchlist(drama._id);
+                    showToast(inWatchlist ? 'Removed from Watchlist' : 'Saved to Watchlist!');
+                  }}
                   className={`h-10 px-4 rounded-lg border text-xs font-semibold inline-flex items-center gap-2 cursor-pointer ${
                     inWatchlist
                       ? 'bg-[#791F35] border-[#791F35] text-white'
@@ -198,22 +293,99 @@ export function WatchPage({ videoId, watchlistIds, onNavigate, onToggleWatchlist
           </div>
         </div>
 
-        {/* Episode Queue Rail */}
-        <aside className="xl:col-span-4 bg-[#1A211D] border border-white/10 rounded-2xl p-4 sm:p-5">
-          <div className="flex items-center justify-between gap-2 pb-3 mb-3 border-b border-white/10">
-            <h2 className="font-display text-xl font-semibold text-white">
-              Episodes ({episodes.length})
-            </h2>
-            {drama && (
-              <button
-                type="button"
-                onClick={() => onNavigate(`/drama/${drama.slug}`)}
-                className="text-xs text-[#D4AF6A] hover:underline cursor-pointer"
+        {/* Right Sidebar: Suggested Next Episode + Episode Queue */}
+        <aside className="xl:col-span-4 space-y-4">
+          {/* USER REQUIREMENT: IF a user select a video for watch then right side suggest the next episode should be show must be */}
+          {nextEp ? (
+            <div className="bg-gradient-to-b from-[#1C2820] to-[#121914] border-2 border-[#087F5B] rounded-2xl p-4 sm:p-5 shadow-2xl relative overflow-hidden">
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#087F5B] text-white text-xs font-bold tracking-wide uppercase shadow">
+                  <Sparkles className="w-3.5 h-3.5 text-[#D4AF6A]" />
+                  Suggested Next Episode
+                </div>
+                <span className="text-xs font-mono tabular-nums text-[#D4AF6A] font-semibold">
+                  Ep {String(nextEp.episodeNumber).padStart(2, '0')}
+                </span>
+              </div>
+
+              <div
+                onClick={() => onNavigate(`/watch/${nextEp._id}`)}
+                className="group relative aspect-video w-full rounded-xl overflow-hidden cursor-pointer border border-white/10 hover:border-[#D4AF6A] transition-all shadow-md"
               >
-                Serial Page
-              </button>
-            )}
-          </div>
+                <MediaImage
+                  src={nextEp.thumbnail}
+                  alt={nextEp.title}
+                  fallbackTitle={nextEp.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-[#087F5B] group-hover:bg-[#099268] flex items-center justify-center text-white shadow-xl group-hover:scale-110 transition-transform">
+                    <Play className="w-5 h-5 fill-current ml-0.5" />
+                  </div>
+                </div>
+                <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/85 font-mono text-[11px] text-white tabular-nums">
+                  {nextEp.duration}
+                </div>
+              </div>
+
+              <div className="mt-3">
+                <h3
+                  onClick={() => onNavigate(`/watch/${nextEp._id}`)}
+                  className="text-sm font-bold text-white hover:text-[#D4AF6A] line-clamp-1 cursor-pointer transition-colors"
+                >
+                  {nextEp.title}
+                </h3>
+                <p className="text-xs text-white/60 line-clamp-1 mt-0.5">
+                  {nextEp.channel} · {formatViews(nextEp.views)}
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => onNavigate(`/watch/${nextEp._id}`)}
+                  className="mt-3.5 w-full py-2.5 rounded-xl bg-[#087F5B] hover:bg-[#099268] text-white text-xs font-bold inline-flex items-center justify-center gap-2 cursor-pointer shadow-lg transition-colors"
+                >
+                  <Play className="w-4 h-4 fill-current" />
+                  Play Next Episode (Ep {nextEp.episodeNumber})
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-[#1A211D] border border-[#D4AF6A]/30 rounded-2xl p-4 text-center">
+              <span className="text-xs font-semibold text-[#D4AF6A] uppercase tracking-wider">
+                Latest Episode
+              </span>
+              <p className="text-xs text-white/70 mt-1">
+                You are currently watching the latest episode of this serial.
+              </p>
+              {episodes.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => onNavigate(`/watch/${episodes[0]._id}`)}
+                  className="mt-2 text-xs text-[#087F5B] hover:underline inline-flex items-center gap-1 font-semibold cursor-pointer"
+                >
+                  <Play className="w-3.5 h-3.5" />
+                  Restart Episode 01
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Episode Queue Rail */}
+          <div className="bg-[#1A211D] border border-white/10 rounded-2xl p-4 sm:p-5">
+            <div className="flex items-center justify-between gap-2 pb-3 mb-3 border-b border-white/10">
+              <h2 className="font-display text-xl font-semibold text-white">
+                All Episodes ({episodes.length})
+              </h2>
+              {drama && (
+                <button
+                  type="button"
+                  onClick={() => onNavigate(`/drama/${drama.slug}`)}
+                  className="text-xs text-[#D4AF6A] hover:underline cursor-pointer"
+                >
+                  Serial Page
+                </button>
+              )}
+            </div>
 
           <div className="space-y-2.5 max-h-[540px] overflow-y-auto pr-1">
             {episodes.map((ep) => {
@@ -257,7 +429,8 @@ export function WatchPage({ videoId, watchlistIds, onNavigate, onToggleWatchlist
               );
             })}
           </div>
-        </aside>
+        </div>
+      </aside>
       </div>
 
       {relatedDramas.length > 0 && (
@@ -275,6 +448,115 @@ export function WatchPage({ videoId, watchlistIds, onNavigate, onToggleWatchlist
             ))}
           </div>
         </section>
+      )}
+
+      {/* Floating Action Confirmation Toast */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl bg-[#087F5B] text-white text-xs font-semibold shadow-2xl border border-white/20 flex items-center gap-2 animate-fade-in">
+          <Check className="w-4 h-4 text-white" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Easy Download Modal */}
+      {showDownloadModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#1A211D] border border-white/15 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+            <button
+              type="button"
+              onClick={() => setShowDownloadModal(false)}
+              className="absolute top-4 right-4 text-white/50 hover:text-white cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-2.5 mb-2">
+              <div className="w-8 h-8 rounded-lg bg-[#087F5B]/30 border border-[#087F5B]/50 flex items-center justify-center text-[#48d597]">
+                <Download className="w-4 h-4" />
+              </div>
+              <h3 className="font-display text-xl font-bold text-white">Download Options</h3>
+            </div>
+            <p className="text-xs text-white/70 mb-4 line-clamp-1">{video.title}</p>
+
+            <div className="space-y-2.5">
+              {/* Option 1: Direct Video File */}
+              {video.videoUrl && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleDownloadDirect(video.videoUrl, `${drama?.slug || 'dramakhana'}-ep${video.episodeNumber}.mp4`);
+                    setShowDownloadModal(false);
+                  }}
+                  className="w-full p-3 rounded-xl bg-[#101512] border border-white/10 hover:border-[#087F5B] text-left flex items-center justify-between group cursor-pointer transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <Film className="w-4 h-4 text-[#087F5B]" />
+                    <div>
+                      <div className="text-xs font-semibold text-white group-hover:text-[#48d597]">
+                        Download Direct Video (MP4)
+                      </div>
+                      <div className="text-[11px] text-white/50">High speed direct file download</div>
+                    </div>
+                  </div>
+                  <Download className="w-4 h-4 text-white/40 group-hover:text-white" />
+                </button>
+              )}
+
+              {/* Option 2: High-Res Episode Poster / Thumbnail */}
+              <button
+                type="button"
+                onClick={() => {
+                  handleDownloadDirect(video.thumbnail, `${drama?.slug || 'dramakhana'}-ep${video.episodeNumber}-cover.jpg`);
+                  setShowDownloadModal(false);
+                }}
+                className="w-full p-3 rounded-xl bg-[#101512] border border-white/10 hover:border-[#D4AF6A] text-left flex items-center justify-between group cursor-pointer transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <ImageIcon className="w-4 h-4 text-[#D4AF6A]" />
+                  <div>
+                    <div className="text-xs font-semibold text-white group-hover:text-[#D4AF6A]">
+                      Download HD Cover Artwork
+                    </div>
+                    <div className="text-[11px] text-white/50">Full resolution poster thumbnail</div>
+                  </div>
+                </div>
+                <Download className="w-4 h-4 text-white/40 group-hover:text-white" />
+              </button>
+
+              {/* Option 3: Official Stream / YouTube Link */}
+              {video.youtubeVideoId && (
+                <a
+                  href={`https://www.youtube.com/watch?v=${video.youtubeVideoId}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => setShowDownloadModal(false)}
+                  className="w-full p-3 rounded-xl bg-[#101512] border border-white/10 hover:border-rose-500 text-left flex items-center justify-between group cursor-pointer transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <ExternalLink className="w-4 h-4 text-rose-400" />
+                    <div>
+                      <div className="text-xs font-semibold text-white group-hover:text-rose-400">
+                        Open in YouTube 1080p
+                      </div>
+                      <div className="text-[11px] text-white/50">Official broadcast channel source</div>
+                    </div>
+                  </div>
+                  <ExternalLink className="w-4 h-4 text-white/40 group-hover:text-white" />
+                </a>
+              )}
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-white/10 text-center">
+              <button
+                type="button"
+                onClick={() => setShowDownloadModal(false)}
+                className="text-xs text-white/60 hover:text-white cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -2,7 +2,7 @@
 
 # DramaKhana (ڈراما خانہ) — Premium Pakistani Drama Streaming Platform
 
-> A modern, cinematic streaming web application dedicated to Pakistani drama serials, featuring dual streaming architectures (direct YouTube synchronization and high-bitrate self-hosted MP4 uploads), dynamic video hero sections, and comprehensive library administration.
+> A modern, cinematic streaming web application dedicated to Pakistani drama serials, featuring dual streaming architectures (direct YouTube synchronization and high-bitrate self-hosted MP4 uploads), dynamic video hero sections, smart episode progression with next-episode suggestions, 1-click video downloads & watchlist saving, and scroll-activated cinema showcases.
 
 ---
 
@@ -12,10 +12,16 @@
 - Designed with rich emerald greens (`#087F5B`), Mughal golds (`#D4AF6A`), and midnight slate tones (`#101512`).
 - Responsive Netflix-style horizontal carousels with smooth touch and scroll interactions.
 - Dynamic genre tagging, episode count tracking, channel filtering, and real-time search.
+- **Scroll-Activated Video Showcase (`3rd.mp4`)**: Smooth IntersectionObserver showcase right before the Romantic Dramas section that plays only when in view and pauses when scrolled away.
+
+### 🎬 Next-Episode Suggestions & Easy Video Download
+- **Smart Next Episode Rail**: Watch page automatically detects the current episode and suggests the next episode with thumbnail, duration, and one-click play.
+- **Easy Video Downloads**: 1-click instant downloads for direct video streams (MP4) and full 1080p artwork thumbnails, plus official broadcast source streams.
+- **Instant Watchlist**: Save and bookmark any Pakistani drama serial or episode with real-time feedback.
 
 ### 🛡️ Dual-Database Persistence & Cloud Sync
 - **Local SQLite Engine (`better-sqlite3`)**: Zero-latency offline and local development with WAL mode and automatic schema migrations.
-- **MongoDB Atlas Cloud Sync (`mongoose`)**: Seamless bidirectional cloud synchronization for users, dramas, episodes, categories, and watch history.
+- **MongoDB Atlas Cloud Sync (`mongoose`)**: Bidirectional cloud synchronization for users, dramas, episodes, categories, and watch history.
 - **Secure Authentication**: JWT-based authentication with bcrypt password hashing and role-based permissions (`admin` / `viewer`).
 
 ### ⚙️ Admin Control Center
@@ -35,38 +41,24 @@
 | **Databases** | MongoDB Atlas (Mongoose) + Local SQLite (better-sqlite3) |
 | **Media & Storage** | Native HTML5 Video, Multer, Express Static with HTTP Range support |
 | **Auth & Security** | JSON Web Tokens (JWT), Bcrypt.js, protected route middleware |
+| **Deployment** | Vercel (`vercel.json`) & GitHub |
 
 ---
 
 ## 🚀 Quick Start & Installation
 
-### 1. Prerequisites
-- [Node.js](https://nodejs.org/) v18+ (tested on v24)
-- [npm](https://www.npmjs.com/) or [pnpm](https://pnpm.io/)
-- (Optional) MongoDB Atlas database cluster
-
-### 2. Clone the Repository
+### 1. Clone the Repository
 ```bash
 git clone https://github.com/jasminaramim/DramaKhana.git
 cd DramaKhana
 ```
 
-### 3. Install Dependencies
+### 2. Install Dependencies
 ```bash
 npm install
 ```
 
-### 4. Configure Environment Variables
-Create a `.env` file in the project root:
-```env
-PORT=3000
-JWT_SECRET=your-secure-jwt-secret-key
-MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.ssmpl.mongodb.net/dramakhana?retryWrites=true&w=majority
-GEMINI_API_KEY=your-optional-gemini-api-key
-```
-*(Note: If `MONGODB_URI` is omitted, DramaKhana automatically runs using the persistent local SQLite database.)*
-
-### 5. Launch the Development Server
+### 3. Launch Development Server
 ```bash
 npm run dev
 ```
@@ -76,68 +68,23 @@ Open your browser and navigate to:
 http://localhost:3000
 ```
 
----
-
-## 📂 Project Structure
-
-```text
-dramakhana/
-├── .env.example              # Environment variables template (safe for public repos)
-├── .gitignore                # Git ignore rules protecting credentials and build artifacts
-├── hero1.mp4                 # Video stream asset for Hero Section 1
-├── hero2.mp4                 # Video stream asset for Hero Section 2
-├── readme.png                # Project hero showcase graphic
-├── index.html                # Vite entry point
-├── package.json              # Project scripts and dependencies
-├── server.ts                 # Express server with Vite middleware & media streaming
-├── public/                   # Publicly served video and image assets
-├── data/                     # Persistent local SQLite storage
-├── server/
-│   ├── auth.ts               # JWT signing, verification, and role middleware
-│   ├── db.ts                 # SQLite schema, MongoDB sync, and data repositories
-│   ├── sampleMedia.ts        # Sample media generators and fallbacks
-│   ├── youtube.ts            # YouTube metadata and playlist synchronizer
-│   ├── models/               # Mongoose schemas for MongoDB cloud persistence
-│   └── routes/
-│       └── api.ts            # RESTful API endpoints for streaming, search, and admin
-└── src/
-    ├── App.tsx               # Root application router and layout
-    ├── main.tsx              # React DOM mounting
-    ├── types.ts              # TypeScript domain types (Drama, Video, Category, etc.)
-    ├── components/
-    │   ├── HeroBanner.tsx    # Dual-video hero banner with audio and slide controls
-    │   ├── Navbar.tsx        # Navigation bar, search, and user profile
-    │   ├── ContentRow.tsx    # Horizontal Netflix-style scrolling carousels
-    │   ├── MediaCards.tsx    # Drama and video episode cards with badges
-    │   ├── MediaImage.tsx    # Resilient image loader with fallback banners
-    │   └── AuthModal.tsx     # Sign-in and sign-up modal
-    └── pages/
-        ├── HomePage.tsx          # Main streaming dashboard
-        ├── WatchPage.tsx         # Theater video player with episode list
-        ├── DramaDetailPage.tsx   # Drama serial synopsis, cast, and all episodes
-        ├── CategoriesPage.tsx    # Genre and category browsing
-        ├── ChannelsPage.tsx      # Channel directories (HUM TV, ARY, etc.)
-        ├── SearchPage.tsx        # Global search across serials, episodes, and actors
-        ├── WatchlistPage.tsx     # Personalized saved watchlist
-        └── AdminDashboard.tsx    # Full admin control and upload management
+### 4. Build for Production / Deployment
+```bash
+npm run build
 ```
 
 ---
 
 ## 📜 Scripts Reference
 
-- `npm run dev` — Starts the Express backend and Vite client in integrated development mode.
-- `npm run build` — Builds the client application for production into `dist/`.
-- `npm run start` — Runs the compiled production server.
-- `npm run lint` — Runs TypeScript type-checking across the entire codebase.
+- `npm run dev` — Starts the Express backend and Vite client in integrated development mode (`http://localhost:3000`).
+- `npm run build` — Compiles and optimizes client-side assets into `dist/`.
+- `npm run preview` — Previews the production build locally.
 
 ---
 
-## 🔒 Security & Privacy Notice
-- Sensitive configuration files (`.env`, `.env.local`) and local SQLite database files (`*.db`) are strictly excluded via `.gitignore`.
-- Password hashes are computed using industry-standard salted bcrypt.
-- JWT tokens authenticate requests across protected API and administration routes.
+## 🌐 Live Deployment
 
----
-
-
+- **Platform**: Vercel
+- **Project Name**: DramaKhana
+- **Developer**: Jasmin ([Jasmin Portfolio](https://jasmin-v01.vercel.app/))

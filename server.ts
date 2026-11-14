@@ -33,6 +33,11 @@ async function startServer() {
     if (fs.existsSync(p)) return res.sendFile(p);
     res.sendFile(path.resolve(process.cwd(), 'hero2.mp4'));
   });
+  app.get('/3rd.mp4', (_req, res) => {
+    const p = path.resolve(process.cwd(), 'public', '3rd.mp4');
+    if (fs.existsSync(p)) return res.sendFile(p);
+    res.sendFile(path.resolve(process.cwd(), '3rd.mp4'));
+  });
 
   app.use('/api', apiRouter);
 

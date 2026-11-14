@@ -22,6 +22,7 @@ import { AboutUsPage } from './pages/AboutUsPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { ContactUsPage } from './pages/ContactUsPage';
 import { TermsPage } from './pages/TermsPage';
+import { PeriodicFakeAdModal } from './components/PeriodicFakeAdModal';
 
 export default function App() {
   const [path, setPath] = useState<string>(() => window.location.pathname || '/');
@@ -196,6 +197,9 @@ export default function App() {
         onClose={() => setAuthOpen(false)}
         onSuccess={handleAuthSuccess}
       />
+
+      {/* Periodic Interstitial Ad: surfaces every 4-6 minutes */}
+      <PeriodicFakeAdModal />
     </div>
   );
 }

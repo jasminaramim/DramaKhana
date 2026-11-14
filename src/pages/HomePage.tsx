@@ -5,6 +5,7 @@ import { api } from '../lib/api';
 import { HeroBanner } from '../components/HeroBanner';
 import { ContentRow } from '../components/ContentRow';
 import { ScrollVideoFeature } from '../components/ScrollVideoFeature';
+import { AdBanner } from '../components/AdBanner';
 
 interface HomePageProps {
   watchlistIds: string[];
@@ -125,6 +126,9 @@ export function HomePage({ watchlistIds, onNavigate, onToggleWatchlist }: HomePa
       </section>
 
       <div className="jali-divider max-w-[1440px] mx-auto my-6 opacity-60" />
+
+      {/* Google AdSense Placement Slot */}
+      <AdBanner />
 
       {/* Dynamic Netflix-style Horizontal Content Rows */}
       <div className="space-y-2">

@@ -18,6 +18,10 @@ import { DramaDetailPage } from './pages/DramaDetailPage';
 import { WatchPage } from './pages/WatchPage';
 import { WatchlistPage } from './pages/WatchlistPage';
 import { AdminDashboard } from './pages/AdminDashboard';
+import { AboutUsPage } from './pages/AboutUsPage';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+import { ContactUsPage } from './pages/ContactUsPage';
+import { TermsPage } from './pages/TermsPage';
 
 export default function App() {
   const [path, setPath] = useState<string>(() => window.location.pathname || '/');
@@ -163,6 +167,14 @@ export default function App() {
         onToggleWatchlist={handleToggleWatchlist}
       />
     );
+  } else if (routePath === '/about' || routePath === '/about-us') {
+    view = <AboutUsPage onNavigate={navigate} />;
+  } else if (routePath === '/privacy' || routePath === '/privacy-policy') {
+    view = <PrivacyPolicyPage onNavigate={navigate} />;
+  } else if (routePath === '/contact' || routePath === '/contact-us') {
+    view = <ContactUsPage onNavigate={navigate} />;
+  } else if (routePath === '/terms' || routePath === '/terms-of-service') {
+    view = <TermsPage onNavigate={navigate} />;
   }
 
   return (

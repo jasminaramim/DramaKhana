@@ -1,0 +1,13 @@
+# DramaKhana (https://drama-khana.vercel.app/)
+User-agent: *
+Allow: /
+
+# Explicit access for Google AdSense Review Crawler
+User-agent: Mediapartners-Google
+Allow: /
+
+# Googlebot Search Indexer
+User-agent: Googlebot
+Allow: /
+
+Sitemap: https://drama-khana.vercel.app/sitemap.xml

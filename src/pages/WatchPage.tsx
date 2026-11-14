@@ -17,6 +17,7 @@ import type { Drama, Video } from '../types';
 import { api, formatViews } from '../lib/api';
 import { MediaImage } from '../components/MediaImage';
 import { DramaCard } from '../components/MediaCards';
+import { AdBanner } from '../components/AdBanner';
 
 interface WatchPageProps {
   videoId: string;
@@ -291,6 +292,9 @@ export function WatchPage({ videoId, watchlistIds, onNavigate, onToggleWatchlist
               </div>
             )}
           </div>
+
+          {/* Google AdSense In-Feed / In-Article Slot */}
+          <AdBanner className="!px-0 my-4" />
         </div>
 
         {/* Right Sidebar: Suggested Next Episode + Episode Queue */}

@@ -44,7 +44,7 @@ export function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps) {
             >
               Contact Us page
             </button>{' '}
-            or email us directly at <span className="text-white font-mono text-xs">contact@dramakhana.com</span>.
+            or email us directly at <a href="mailto:jasminaramim2005@gmail.com" className="text-white hover:underline font-mono text-xs">jasminaramim2005@gmail.com</a>.
           </p>
         </section>
 
@@ -184,8 +184,8 @@ export function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps) {
             If you have questions about this policy or wish to exercise your data rights, contact us at:
           </p>
           <div className="p-4 rounded-xl bg-[#101512] border border-white/10 inline-block font-mono text-xs sm:text-sm text-[#D4AF6A]">
-            Email: contact@dramakhana.com <br />
-            Developer: jasminaramim2005@gmail.com <br />
+            Email: jasminaramim2005@gmail.com <br />
+            Developer: Jasmin (Web Developer) <br />
             Online Portal:{' '}
             <button
               type="button"

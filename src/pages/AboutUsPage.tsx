@@ -82,10 +82,10 @@ export function AboutUsPage({ onNavigate }: AboutUsPageProps) {
               ENGINEERED & MAINTAINED BY
             </div>
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-white">
-              Jasmin — Full-Stack Architect
+              Jasmin — Web Developer
             </h2>
             <p className="text-sm text-white/75 leading-relaxed">
-              DramaKhana is built and maintained by Jasmin, a full-stack engineer passionate about performant web architectures, cultural digital preservation, and cinematic frontend experiences.
+              DramaKhana is designed, built, and maintained by Jasmin, a passionate web developer dedicated to performant web architectures, cultural digital preservation, and cinematic streaming experiences.
             </p>
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <a
@@ -113,8 +113,13 @@ export function AboutUsPage({ onNavigate }: AboutUsPageProps) {
               J
             </div>
             <h4 className="font-bold text-white text-sm">Jasmin</h4>
-            <p className="text-xs text-[#D4AF6A]">Software Engineer</p>
-            <p className="text-[11px] text-white/50 font-mono">contact@dramakhana.com</p>
+            <p className="text-xs text-[#D4AF6A]">Web Developer</p>
+            <a
+              href="mailto:jasminaramim2005@gmail.com"
+              className="text-[11px] text-white/70 hover:text-white font-mono transition-colors block"
+            >
+              jasminaramim2005@gmail.com
+            </a>
           </div>
         </section>
       </div>

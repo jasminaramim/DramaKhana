@@ -170,9 +170,9 @@ export function ContactUsPage({ onNavigate }: ContactUsPageProps) {
                 <Mail className="w-4 h-4" />
               </div>
               <div>
-                <span className="text-white/60 block text-[11px]">Official Editorial Email</span>
-                <a href="mailto:contact@dramakhana.com" className="text-[#D4AF6A] font-semibold hover:underline">
-                  contact@dramakhana.com
+                <span className="text-white/60 block text-[11px]">Official Contact Email</span>
+                <a href="mailto:jasminaramim2005@gmail.com" className="text-[#D4AF6A] font-semibold hover:underline">
+                  jasminaramim2005@gmail.com
                 </a>
               </div>
             </div>

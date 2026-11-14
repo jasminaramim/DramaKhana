@@ -65,9 +65,9 @@ const AD_CREATIVES: AdCreative[] = [
   },
 ];
 
-// 4 to 6 minutes in milliseconds: 4 * 60 * 1000 = 240,000ms; 6 * 60 * 1000 = 360,000ms
-const MIN_INTERVAL_MS = 4 * 60 * 1000;
-const MAX_INTERVAL_MS = 6 * 60 * 1000;
+// User requirement: Show popup in 30 seconds when entering the site, and then show after 2 minutes
+const INITIAL_DELAY_MS = 30 * 1000; // 30 seconds
+const REPEAT_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes
 
 export function PeriodicFakeAdModal() {
   const [modalOpen, setModalOpen] = useState(false);
@@ -76,10 +76,6 @@ export function PeriodicFakeAdModal() {
   const [countdown, setCountdown] = useState(5);
   const [canSkip, setCanSkip] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
-
-  const getRandomInterval = () => {
-    return Math.floor(Math.random() * (MAX_INTERVAL_MS - MIN_INTERVAL_MS + 1)) + MIN_INTERVAL_MS;
-  };
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -90,7 +86,7 @@ export function PeriodicFakeAdModal() {
       setCountdown(5);
       setCanSkip(false);
 
-      // Randomly show either center interstitial popup or floating corner popup
+      // Show either center interstitial popup or floating corner popup
       const showCorner = Math.random() > 0.5;
       if (showCorner) {
         setCornerPopupOpen(true);
@@ -99,9 +95,8 @@ export function PeriodicFakeAdModal() {
       }
     };
 
-    // First appearance: scheduled between 4 and 6 minutes
-    const initialDelay = getRandomInterval();
-    timer = setTimeout(triggerNextAd, initialDelay);
+    // First appearance: precisely 30 seconds after user enters the site
+    timer = setTimeout(triggerNextAd, INITIAL_DELAY_MS);
 
     return () => clearTimeout(timer);
   }, []);
@@ -121,7 +116,7 @@ export function PeriodicFakeAdModal() {
   }, [modalOpen, countdown]);
 
   const scheduleNextCycle = () => {
-    const nextInterval = getRandomInterval();
+    // Show next ad 2 minutes after the user dismisses the current one
     setTimeout(() => {
       setAdIndex((prev) => (prev + 1) % AD_CREATIVES.length);
       setCountdown(5);
@@ -132,7 +127,7 @@ export function PeriodicFakeAdModal() {
       } else {
         setModalOpen(true);
       }
-    }, nextInterval);
+    }, REPEAT_INTERVAL_MS);
   };
 
   const handleCloseModal = () => {

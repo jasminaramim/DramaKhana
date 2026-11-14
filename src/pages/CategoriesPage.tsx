@@ -16,7 +16,7 @@ export function CategoriesPage({ slug, onNavigate }: CategoriesPageProps) {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [videos, setVideos] = useState<Video[]>([]);
   const [sourceFilter, setSourceFilter] = useState<SourceFilterValue>('all');
-  const [sortOrder, setSortOrder] = useState<'latest' | 'popular'>('latest');
+  const [sortOrder, setSortOrder] = useState<'latest' | 'popular'>('popular');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -61,9 +61,7 @@ export function CategoriesPage({ slug, onNavigate }: CategoriesPageProps) {
             <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-white/60 tabular-nums">
               <span>{selectedCategory.totalCount || 0} Total Episodes</span>
               <span aria-hidden="true">·</span>
-              <span>{selectedCategory.youtubeCount || 0} YouTube</span>
-              <span aria-hidden="true">·</span>
-              <span className="text-[#087F5B] font-medium">{selectedCategory.ownUploadCount || 0} Own Upload</span>
+              <span className="text-[#087F5B] font-medium">Official YouTube HD</span>
             </div>
           </div>
         )}
@@ -160,11 +158,9 @@ export function CategoriesPage({ slug, onNavigate }: CategoriesPageProps) {
                 </h2>
                 <p className="text-xs text-white/75 line-clamp-2 mt-1">{cat.description}</p>
                 <div className="mt-3 flex items-center gap-2 text-xs text-white/80 tabular-nums">
-                  <span>{cat.totalCount || 0} Videos</span>
+                  <span>{cat.totalCount || 0} Episodes</span>
                   <span aria-hidden="true">·</span>
-                  <span>YouTube: {cat.youtubeCount || 0}</span>
-                  <span aria-hidden="true">·</span>
-                  <span className="text-[#D4AF6A]">Own Upload: {cat.ownUploadCount || 0}</span>
+                  <span className="text-[#087F5B] font-medium">Official YouTube HD</span>
                 </div>
               </div>
             </button>

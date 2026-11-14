@@ -47,9 +47,22 @@ export function Footer({ onNavigate }: FooterProps) {
           <p className="text-xs text-white/55">
             Featuring HUM TV, ARY Digital, Geo Entertainment, and Green Entertainment catalogs.
           </p>
-          <p className="text-xs text-white/40">
-            © {new Date().getFullYear()} DramaKhana. Crafted for Pakistani Storytelling.
-          </p>
+          <div className="flex flex-col md:items-end gap-1">
+            <p className="text-xs text-white/50">
+              Developed by{' '}
+              <a
+                href="https://jasmin-v01.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#D4AF6A] hover:text-[#f3d08c] font-semibold underline underline-offset-2 transition-colors cursor-pointer"
+              >
+                Jasmin
+              </a>
+            </p>
+            <p className="text-[11px] text-white/40">
+              © {new Date().getFullYear()} DramaKhana. Crafted for Pakistani Storytelling.
+            </p>
+          </div>
         </div>
       </div>
     </footer>

@@ -8,17 +8,6 @@
 
 ## 🌟 Key Highlights & Features
 
-### 🎬 Dynamic Video Hero Section
-- **Hero Section 1 (`hero1.mp4`)**: Cinematic background video preview showcasing *Ishq-e-Haveli* (HUM TV).
-- **Hero Section 2 (`hero2.mp4`)**: Atmospheric monsoon video preview featuring *Shab-e-Wafa* (ARY Digital).
-- **Interactive Playback Controls**: Auto-play muted video with one-click sound unmuting, subtle architectural jaali motifs, high-contrast scrims, and smooth fallback posters.
-- **Direct Streaming Integration**: Clicking **Watch Now** instantly launches the episode in the theater player.
-
-### 📺 Dual Video Streaming Architecture
-- **Official YouTube Synchronization**: Stream legal, high-definition broadcast episodes directly from HUM TV, ARY Digital, Geo Entertainment, and Green Entertainment.
-- **Self-Hosted Video Streaming**: Native HTML5 streaming with HTTP `206 Partial Content` Range headers for instant seeking, pause/resume, and zero-buffering playback.
-- **Comprehensive Theater Player**: Episode switching, autoplay next, watch progress saving, and related serial recommendations.
-
 ### 🏛️ Cultural Pakistani Aesthetic & UI
 - Designed with rich emerald greens (`#087F5B`), Mughal golds (`#D4AF6A`), and midnight slate tones (`#101512`).
 - Responsive Netflix-style horizontal carousels with smooth touch and scroll interactions.
@@ -151,6 +140,4 @@ dramakhana/
 
 ---
 
-## 📄 License
-This project is open-source and available under the [MIT License](LICENSE).
 

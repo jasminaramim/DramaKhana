@@ -102,7 +102,7 @@ export function HeroBanner({ dramas, onWatchDrama, onViewDetails }: HeroBannerPr
             {activeHeroVideo && (
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#087F5B]/30 border border-[#087F5B]/60 text-[#48d597]">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#48d597] animate-pulse" />
-                {index === 0 ? 'Hero Section 1 · hero1.mp4' : index === 1 ? 'Hero Section 2 · hero2.mp4' : 'Video Preview'}
+                {index === 0 ? 'Trending #1 · Dar-e-Nijaat' : index === 1 ? 'Trending #2 · Kabhi Main Kabhi Tum' : 'Featured Serial'}
               </span>
             )}
             <span>Featured Serial</span>

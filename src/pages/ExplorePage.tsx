@@ -13,7 +13,7 @@ interface ExplorePageProps {
 export function ExplorePage({ watchlistIds, onNavigate, onToggleWatchlist }: ExplorePageProps) {
   const [viewMode, setViewMode] = useState<'videos' | 'dramas'>('videos');
   const [sourceType, setSourceType] = useState<SourceFilterValue>('all');
-  const [sortOrder, setSortOrder] = useState<'latest' | 'popular'>('latest');
+  const [sortOrder, setSortOrder] = useState<'latest' | 'popular'>('popular');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedChannel, setSelectedChannel] = useState('');
 

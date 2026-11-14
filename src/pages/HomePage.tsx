@@ -114,9 +114,9 @@ export function HomePage({ watchlistIds, onNavigate, onToggleWatchlist }: HomePa
                 </span>
               </div>
               <div className="mt-1.5 flex items-center gap-2 text-[11px] text-white/55 tabular-nums">
-                <span>YT: {cat.youtubeCount || 0}</span>
+                <span className="text-[#087F5B] font-medium">Official YouTube HD</span>
                 <span aria-hidden="true">·</span>
-                <span className="text-[#087F5B] font-medium">Own: {cat.ownUploadCount || 0}</span>
+                <span>{cat.totalCount || 0} Serials</span>
               </div>
             </button>
           ))}

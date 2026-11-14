@@ -121,3 +121,4 @@ export function AboutUsPage({ onNavigate }: AboutUsPageProps) {
     </div>
   );
 }
+

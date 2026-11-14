@@ -200,3 +200,4 @@ export function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps) {
     </div>
   );
 }
+

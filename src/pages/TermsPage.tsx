@@ -102,3 +102,4 @@ export function TermsPage({ onNavigate }: TermsPageProps) {
     </div>
   );
 }
+

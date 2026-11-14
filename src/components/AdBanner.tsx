@@ -15,7 +15,7 @@ declare global {
 
 export function AdBanner({
   slot = '1234567890',
-  client = 'ca-pub-0000000000000000',
+  client = 'ca-pub-6064612688052081',
   format = 'auto',
   className = '',
 }: AdBannerProps) {
@@ -31,7 +31,7 @@ export function AdBanner({
     }
   }, []);
 
-  const isConfigured = client !== 'ca-pub-0000000000000000';
+  const isConfigured = Boolean(client && client.startsWith('ca-pub-') && client !== 'ca-pub-0000000000000000');
 
   return (
     <div className={`w-full max-w-[1440px] mx-auto px-4 sm:px-8 my-6 ${className}`}>
@@ -65,3 +65,4 @@ export function AdBanner({
     </div>
   );
 }
+
